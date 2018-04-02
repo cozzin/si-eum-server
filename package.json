@@ -16,7 +16,7 @@
     "supertest": "^3.0.0"
   },
   "scripts": {
-    "test": "NODE_ENV=test mocha api/user/user.spec.js -w",
+    "test": "NODE_ENV=test mocha api/poem/poem.spec.js -w",
     "start": "node bin/www.js"
   },
   "author": "",

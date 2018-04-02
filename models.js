@@ -13,4 +13,10 @@ const User = sequelize.define('User', {
   }
 });
 
-module.exports = {Sequelize, sequelize, User};
+const Poem = sequelize.define('Poem', {
+  title: Sequelize.STRING,
+  contents: Sequelize.TEXT,
+  reservationDate: Sequelize.DATE
+});
+
+module.exports = {Sequelize, sequelize, User, Poem};
