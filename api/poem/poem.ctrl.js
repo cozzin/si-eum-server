@@ -1,6 +1,8 @@
 const models = require('../../models');
 
 const index = (req, res) => {
+  console.log('index');
+
   req.query.limit = req.query.limit || 10;
   const limit = parseInt(req.query.limit, 10);
   if (Number.isNaN(limit)) {
@@ -11,12 +13,41 @@ const index = (req, res) => {
     .findAll({
       limit: limit
     })
-    .then(users => {
-      res.json(users);
+    .then(poems => {
+      res.json(poems);
     });
 };
 
+const today = (req, res) => {
+  const Op = models.Sequelize.Op;
+
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const tommrrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+
+  console.log('오늘: ' + today);
+  console.log('내일: ' + tommrrow);
+
+  models.Poem.findAll({
+    where: {
+      reservationDate: {
+        [Op.gte]: today,
+        [Op.lt]: tommrrow
+      }
+    }
+  }).then(poem => {
+    if (poem.length == 0) return res.status(404).end();
+
+    console.log('검색된 시: ' + poem[0]['title'])
+    console.log('검색된 시 시간: ' + poem[0]['reservationDate'])
+
+    res.json(poem[0]);
+  });
+};
+
 const show = (req, res) => {
+  console.log('show');
+
   const id = parseInt(req.params.id, 10);
   if (Number.isNaN(id)) return res.status(400).end();
 
@@ -31,6 +62,8 @@ const show = (req, res) => {
 };
 
 const destroy = (req, res) => {
+  console.log('destroy');
+
   const id = parseInt(req.params.id, 10);
   if (Number.isNaN(id)) return res.status(400).end();
 
@@ -42,6 +75,8 @@ const destroy = (req, res) => {
 };
 
 const create = (req, res) => {
+  console.log('create');
+
   const title = req.body.title;
   const contents = req.body.contents;
   const reservationDate = req.body.reservationDate;
@@ -60,6 +95,8 @@ const create = (req, res) => {
 };
 
 const update = (req, res) => {
+  console.log('update');
+
   const id = parseInt(req.params.id);
   if (Number.isNaN(id)) return res.status(400).end();
 
@@ -88,5 +125,6 @@ module.exports = {
   show,
   destroy,
   create,
-  update
+  update,
+  today
 };
