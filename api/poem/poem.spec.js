@@ -52,6 +52,63 @@ describe('GET /poem은', ()=> {
   })
 });
 
+describe.only('GET /today 는', () => {
+  describe('성공시', () => {
+    const now = new Date();
+    const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const tommrrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  
+    const poems = [
+      {
+        title: '어제 시 제목',
+        contents: '어제 시 내용\n뭔가 다양한 글들이 있을 것이다.',
+        reservationDate: yesterday
+      },
+      {
+        title: '오늘 시 제목',
+        contents: '오늘 시 내용\n뭔가 다양한 글들이 있을 것이다.',
+        reservationDate: today
+      },
+      {
+        title: '내일 시 제목',
+        contents: '내일 시 내용\n뭔가 다양한 글들이 있을 것이다.',
+        reservationDate: tommrrow
+      }
+    ]
+    before(() => models.sequelize.sync({force: true}));
+    before(() => models.Poem.bulkCreate(poems));
+
+    it('오늘 날짜에 해당하는 시를 가져온다', (done) => {
+      request(app)
+      .get('/poem/today')
+      .end((err, res) => {
+        const resDate = new Date(res.body.reservationDate);
+        resDate.toDateString().should.be.equal(today.toDateString());
+        done();
+      });
+    });
+  })
+  describe('실패시', () => {
+    const poem = [
+      {
+        title: '예전 시 제목',
+        contents: '예전 시 내용\n뭔가 다양한 글들이 있을 것이다.',
+        reservationDate: Date.UTC(0)
+      }
+    ]
+    before(() => models.sequelize.sync({force: true}));
+    before(() => models.Poem.bulkCreate(poem));
+
+    it('오늘 날짜 시를 찾을 수 없는 경우 404로 응답한다', (done) => {
+      request(app)
+        .get('/poem/today')
+        .expect(404)
+        .end(done);
+    });
+  });
+});
+
 describe('GET /users/2은', () => {
   const users = [{name: 'alice'}, {name: 'bek'}, {name: 'chris'}]
   before(() => models.sequelize.sync({force: true}));
@@ -108,7 +165,7 @@ describe('DELETE /users/:id는', () => {
   })
 });
 
-describe.only('POST /users', () => {
+describe('POST /users', () => {
   const poems = [
     {
       title: '첫 번째 시 제목',
@@ -157,7 +214,7 @@ describe.only('POST /users', () => {
       body.should.have.property('contents', contents);
     });
     it('입력한 reservationDate를 반환한다', () => {
-      body.should.have.property('reservationDate');
+      body['reservationDate'].should.be.instanceOf(String, 1525132800000)
     });
   });
 
