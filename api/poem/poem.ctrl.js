@@ -100,17 +100,28 @@ const update = (req, res) => {
   const id = parseInt(req.params.id);
   if (Number.isNaN(id)) return res.status(400).end();
 
-  const name = req.body.name;
-  if (!name) return res.status(400).end();
+  const title = req.body.title;
+  const contents = req.body.contents;
+  const reservationDate = req.body.reservationDate;
+  if (!title && !contents && !reservationDate) return res.status(400).end();
 
-  models.User.findOne({where: {id}})
-    .then(user => {
-      if (!user) return res.status(404).end();
+  models.Poem.findOne({where: {id}})
+    .then(poem => {
+      if (!poem) return res.status(404).end();
 
-      user.name = name;
-      user.save()
+      if (title) {
+        poem.title = title;
+      }
+      if (contents) {
+        poem.contents = contents;
+      }
+      if (reservationDate) {
+        poem.reservationDate = reservationDate;
+      }
+      
+      poem.save()
           .then( _ => {
-            res.json(user);
+            res.json(poem);
           })
           .catch( err => {
             if (err.name === 'SequelizeUniqueConstraintError') {
