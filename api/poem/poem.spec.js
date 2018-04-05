@@ -141,7 +141,7 @@ describe('GET /users/2은', () => {
   })
 });
 
-describe.only('DELETE /poem/:id는', () => {
+describe('DELETE /poem/:id는', () => {
   const now = new Date();
   const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -252,19 +252,56 @@ describe('POST /users', () => {
   });
 });
 
-describe('PUT /users/:id', () => {
-  const users = [{name: 'alice'}, {name: 'bek'}, {name: 'chris'}]
+describe.only('PUT /users/:id', () => {
+  const poems = [
+    {
+      title: '첫 번째 시 제목',
+      contents: '첫 번째 시 내용\n뭔가 다양한 글들이 있을 것이다.',
+      reservationDate: Date.UTC(2018, 4, 1)
+    },
+    {
+      title: '두 번째 시 제목',
+      contents: '첫 번째 시 내용\n뭔가 다양한 글들이 있을 것이다.',
+      reservationDate: Date.UTC(2018, 4, 2)
+    }, 
+    {
+      title: '세 번째 시 제목',
+      contents: '첫 번째 시 내용\n뭔가 다양한 글들이 있을 것이다.',
+      reservationDate: Date.UTC(2018, 4, 3)
+    }
+  ]
   before(() => models.sequelize.sync({force: true}));
-  before(() => models.User.bulkCreate(users));
+  before(() => models.Poem.bulkCreate(poems));
 
   describe('성공시', () => {
-    it('변경된 name을 응답한다', (done) => {
-      const name = 'charlly';
+    it('변경된 title을 응답한다', (done) => {
+      const title = '변경할 시 제목';
       request(app)
-        .put('/users/3')
-        .send({name})
+        .put('/poem/3')
+        .send({title})
         .end((err, res) => {
-          res.body.should.have.property('name', name);
+          res.body.should.have.property('title', title);
+          done();
+        });
+    });
+    it('변경된 contents를 응답한다', (done) => {
+      const contents = '변경할 시 내용';
+      request(app)
+        .put('/poem/3')
+        .send({contents})
+        .end((err, res) => {
+          res.body.should.have.property('contents', contents);
+          done();
+        });
+    });
+    it('변경된 reservationDate를 응답한다', (done) => {
+      const reservationDate = new Date(2018, 3, 6).toISOString();
+      console.log(reservationDate)
+      request(app)
+        .put('/poem/3')
+        .send({reservationDate})
+        .end((err, res) => {
+          res.body.should.have.property('reservationDate', reservationDate);
           done();
         });
     });
@@ -272,29 +309,22 @@ describe('PUT /users/:id', () => {
   describe('실패시', () => { 
     it('정수가 아닌 id일 경우 400을 응답한다', (done) => {
       request(app)
-        .put('/users/one')
+        .put('/poem/one')
         .expect(400)
         .end(done);
     });
-    it('name이 없을 경우 400을 응답한다', (done) => {
+    it('파라미터가 하나라도 없을 경우 400을 응답한다', (done) => {
       request(app)
-        .put('/users/1')
+        .put('/poem/1')
         .send({})
         .expect(400)
         .end(done);
     });
-    it('없는 유저일 경우 404로 응답한다', (done) => {
+    it('시가 없는 경우 404로 응답한다', (done) => {
       request(app)
-        .put('/users/999')
-        .send({name: 'foo'})
+        .put('/poem/999')
+        .send({title: 'foo'})
         .expect(404)
-        .end(done);
-    });
-    it('이름이 중복일 경우 409를 응답한다', (done) => {
-      request(app)
-        .put('/users/3')
-        .send({name: 'bek'})
-        .expect(409)
         .end(done);
     });
   })
