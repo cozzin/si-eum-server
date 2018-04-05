@@ -109,17 +109,33 @@ describe('GET /today 는', () => {
   });
 });
 
-describe('GET /users/2은', () => {
-  const users = [{name: 'alice'}, {name: 'bek'}, {name: 'chris'}]
+describe('GET /poem/3 은', () => {
+  const poems = [
+    {
+      title: '첫 번째 시 제목',
+      contents: '첫 번째 시 내용\n뭔가 다양한 글들이 있을 것이다.',
+      reservationDate: Date.UTC(2018, 4, 1)
+    },
+    {
+      title: '두 번째 시 제목',
+      contents: '첫 번째 시 내용\n뭔가 다양한 글들이 있을 것이다.',
+      reservationDate: Date.UTC(2018, 4, 2)
+    }, 
+    {
+      title: '세 번째 시 제목',
+      contents: '첫 번째 시 내용\n뭔가 다양한 글들이 있을 것이다.',
+      reservationDate: Date.UTC(2018, 4, 3)
+    }
+  ]
   before(() => models.sequelize.sync({force: true}));
-  before(() => models.User.bulkCreate(users));
+  before(() => models.Poem.bulkCreate(poems));
 
   describe('성공시', () => {
-    it('id가 1인 유저 객체를 반환한다', (done) => {
+    it('id가 3인 시 객체를 반환한다', (done) => {
       request(app)
-        .get('/users/2')
+        .get('/poem/3')
         .end((err, res) => {
-          res.body.should.have.property('id', 2);
+          res.body.should.have.property('id', 3);
           done();
         });
     });
@@ -128,13 +144,13 @@ describe('GET /users/2은', () => {
   describe('실패시', () => {
     it('id가 숫자가 아닐 경우 400으로 응답한다', (done) => {
       request(app)
-        .get('/users/one')
+        .get('/poem/one')
         .expect(400)
         .end(done)
     });
-    it('id로 유저를 찾을 수 없는 경우 404로 응답한다', (done) => {
+    it('id로 시를 찾을 수 없는 경우 404로 응답한다', (done) => {
       request(app)
-        .get('/users/999')
+        .get('/poem/999')
         .expect(404)
         .end(done);
     });
@@ -252,7 +268,7 @@ describe('POST /users', () => {
   });
 });
 
-describe.only('PUT /users/:id', () => {
+describe('PUT /users/:id', () => {
   const poems = [
     {
       title: '첫 번째 시 제목',
